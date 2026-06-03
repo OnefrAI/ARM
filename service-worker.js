@@ -1,4 +1,4 @@
-const CACHE_NAME = "arm-pwa-v2";
+const CACHE_NAME = "arm-pwa-v4";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",

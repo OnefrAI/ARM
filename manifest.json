@@ -1,6 +1,6 @@
 {
-  "name": "ARM",
-  "short_name": "ARM",
+  "name": "ARMERO U.P.R.",
+  "short_name": "U.P.R.",
   "description": "Interfaz privada de gestion",
   "start_url": "./index.html",
   "scope": "./",
