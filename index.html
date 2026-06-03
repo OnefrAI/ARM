@@ -6,6 +6,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#020304">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <title>Armero UPR</title>
     <style>
         * {
@@ -879,6 +883,20 @@
         renderIndicativos();
         if (!loadState()) {
             setDefaultDateTime();
+        }
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./service-worker.js")
+                    .then((registration) => {
+                        if (registration.waiting) {
+                            registration.waiting.postMessage({ action: "skipWaiting" });
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Service Worker no registrado:", error);
+                    });
+            });
         }
     </script>
 </body>
