@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Armero UPR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #020304 0%, #080a0d 100%);
+            color: #fff;
+            padding: 10px;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #090b0f 0%, #11141a 100%);
+            padding: 24px 18px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-main {
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr) 46px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-logo {
+            width: 46px;
+            height: 58px;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 0 7px rgba(160, 255, 0, 0.18));
+        }
+
+        .header-title {
+            font-size: 25px;
+            font-weight: 800;
+            color: #a0ff00;
+            text-shadow: 0 0 10px rgba(160, 255, 0, 0.45);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header-subtitle {
+            margin-top: 6px;
+            color: #d8dee9;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-bottom: 22px;
+        }
+
+        .field-group,
+        .indicativo-card {
+            background: linear-gradient(135deg, #090b0f 0%, #101217 100%);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            font-size: 13px;
+            font-weight: 800;
+            color: #a0ff00;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .label {
+            font-size: 11px;
+            color: #aab0c2;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .input-text,
+        .select-field,
+        .textarea-field {
+            width: 100%;
+            background-color: #15181e;
+            border: 1px solid #272c34;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            color: #fff;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .select-field {
+            min-height: 45px;
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #a0ff00 50%),
+                linear-gradient(135deg, #a0ff00 50%, transparent 50%);
+            background-position:
+                calc(100% - 18px) 19px,
+                calc(100% - 12px) 19px;
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+            padding-right: 34px;
+        }
+
+        .textarea-field {
+            min-height: 44px;
+            resize: vertical;
+            margin-top: 8px;
+            line-height: 1.35;
+        }
+
+        .input-text:focus,
+        .select-field:focus,
+        .textarea-field:focus {
+            outline: none;
+            border-color: #a0ff00;
+            background-color: #1b1f27;
+        }
+
+        .input-text::placeholder,
+        .textarea-field::placeholder {
+            color: #737b91;
+        }
+
+        details.indicativo-card {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 14px 12px;
+            touch-action: manipulation;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .indicativo-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .indicativo-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .indicativo-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0ff00;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.7px;
+        }
+
+        .completion-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+            place-items: center;
+            background: linear-gradient(135deg, #a0ff00 0%, #80cc00 100%);
+            color: #071019;
+            font-size: 14px;
+            font-weight: 900;
+            line-height: 1;
+            box-shadow: 0 0 10px rgba(160, 255, 0, 0.35);
+        }
+
+        .indicativo-card.is-filled .completion-check {
+            display: grid;
+        }
+
+        .equipment-checks {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 9px;
+        }
+
+        .equipment-option {
+            position: relative;
+            min-width: 0;
+        }
+
+        .equipment-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .equipment-option span {
+            display: grid;
+            place-items: center;
+            min-height: 34px;
+            padding: 6px 5px;
+            border-radius: 8px;
+            background-color: #171a20;
+            border: 1px solid #303640;
+            color: #d8dee9;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1.1;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .equipment-option input:checked + span {
+            background: linear-gradient(135deg, #a0ff00 0%, #80cc00 100%);
+            color: #071019;
+            border-color: #a0ff00;
+        }
+
+        .return-option {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background-color: #15181e;
+            border: 1px solid #272c34;
+            border-radius: 8px;
+            padding: 9px 10px;
+            color: #d8dee9;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .return-option input {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #6c7594;
+            background-color: #07090c;
+            flex: 0 0 16px;
+        }
+
+        .return-option input:checked {
+            border-color: #a0ff00;
+            background:
+                radial-gradient(circle, #a0ff00 0 45%, transparent 48%),
+                #07090c;
+        }
+
+        .indicativo-status {
+            color: #c5cad8;
+            font-size: 12px;
+            text-align: right;
+            line-height: 1.25;
+        }
+
+        .chevron {
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(160, 255, 0, 0.1);
+            border: 1px solid rgba(160, 255, 0, 0.28);
+            display: grid;
+            place-items: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .chevron::before {
+            content: "";
+            width: 9px;
+            height: 9px;
+            border-right: 2px solid #a0ff00;
+            border-bottom: 2px solid #a0ff00;
+            transform: rotate(45deg) translate(-2px, -2px);
+            transition: transform 0.2s;
+        }
+
+        details[open] .chevron {
+            background: rgba(160, 255, 0, 0.18);
+            border-color: rgba(160, 255, 0, 0.5);
+        }
+
+        details[open] .chevron::before {
+            transform: rotate(225deg) translate(-2px, -2px);
+        }
+
+        .indicativo-body {
+            padding: 0 12px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .weapon-card {
+            background-color: #15181e;
+            border: 1px solid #272c34;
+            border-radius: 10px;
+            padding: 11px;
+        }
+
+        .weapon-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+
+        .weapon-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 126px;
+            gap: 9px;
+            align-items: end;
+        }
+
+        .magazines {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .magazine-option {
+            position: relative;
+        }
+
+        .magazine-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .magazine-option span {
+            display: grid;
+            place-items: center;
+            height: 45px;
+            border-radius: 8px;
+            background-color: #20242c;
+            color: #d8dee9;
+            border: 1px solid #343a44;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .magazine-option input:checked + span {
+            background: linear-gradient(135deg, #a0ff00 0%, #80cc00 100%);
+            color: #071019;
+            border-color: #a0ff00;
+        }
+
+        .action-buttons {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .secondary-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #a0ff00 0%, #80cc00 100%);
+            color: #000;
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25d366 0%, #1ea952 100%);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #20242c;
+            color: #fff;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #a0ff00;
+            color: #000;
+            padding: 15px 24px;
+            border-radius: 10px;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(160, 255, 0, 0.5);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 20px 14px;
+            }
+
+            .header-main {
+                grid-template-columns: 38px minmax(0, 1fr) 38px;
+                gap: 7px;
+            }
+
+            .header-logo {
+                width: 38px;
+                height: 48px;
+            }
+
+            .header-title {
+                font-size: 19px;
+            }
+
+            .row,
+            .weapon-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .magazines {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-main">
+                <img class="header-logo" src="assets/brand.svg" alt="UPR">
+                <div class="header-title">ARMERO U.P.R.</div>
+                <img class="header-logo" src="assets/brand.svg" alt="UPR">
+            </div>
+            <div class="header-subtitle">Gestion de armas colectivas</div>
+        </div>
+
+        <div class="content">
+            <div class="field-group">
+                <div class="section-header">Datos del servicio</div>
+                <div class="row">
+                    <div>
+                        <div class="label">Fecha</div>
+                        <input type="date" class="input-text" id="fecha">
+                    </div>
+                    <div>
+                        <div class="label">Hora inicio</div>
+                        <input type="time" class="input-text" id="horaInicio">
+                    </div>
+                </div>
+            </div>
+
+            <div id="indicativosContainer"></div>
+
+            <div class="action-buttons">
+                <button class="btn btn-copy" onclick="copyReport()">COPIAR</button>
+                <div class="secondary-actions">
+                    <button class="btn btn-whatsapp" onclick="shareWhatsApp()">WHATSAPP</button>
+                    <button class="btn btn-reset" onclick="resetForm()">LIMPIAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const indicativos = ["SIGMA 1", "SIGMA 10", "SIGMA 11", "SIGMA 12", "SIGMA 13", "SIGMA 14", "SIGMA 15", "SIGMA 16"];
+
+        const weaponTypes = [
+            { id: "franchi", name: "Franchi", numbers: ["1567", "1581", "1691", "2233", "4334", "4695", "4769", "6009", "7710", "61580"] },
+            { id: "skorpion", name: "Skorpion", numbers: ["0040", "0195", "0199", "0203"] },
+            { id: "g36", name: "G36", numbers: ["33716", "33835", "33836"] }
+        ];
+
+        const equipmentTypes = [
+            { id: "canana", name: "Canana" },
+            { id: "escudo-ligero", name: "Escudo ligero" },
+            { id: "escudo-pesado", name: "Escudo pesado" }
+        ];
+
+        function normalizeId(text) {
+            return text.toLowerCase().replace(/\s+/g, "-");
+        }
+
+        function createOptions(numbers) {
+            return ["", ...numbers].map((number) => {
+                const label = number || "Sin asignar";
+                return `<option value="${number}">${label}</option>`;
+            }).join("");
+        }
+
+        function renderIndicativos() {
+            const container = document.getElementById("indicativosContainer");
+            container.innerHTML = indicativos.map((indicativo, index) => {
+                const indicativoId = normalizeId(indicativo);
+                const equipmentHtml = equipmentTypes.map((equipment) => {
+                    const equipmentId = `${indicativoId}-${equipment.id}`;
+                    return `
+                        <label class="equipment-option">
+                            <input type="checkbox" id="${equipmentId}" onchange="updateStatus('${indicativoId}'); saveState();">
+                            <span>${equipment.name}</span>
+                        </label>
+                    `;
+                }).join("");
+                const weaponsHtml = weaponTypes.map((weapon) => {
+                    const baseId = `${indicativoId}-${weapon.id}`;
+                    return `
+                        <div class="weapon-card">
+                            <div class="weapon-title">${weapon.name}</div>
+                            <div class="weapon-grid">
+                                <div class="indicativo-main">
+                                    <div class="label">Numero</div>
+                                    <select class="select-field weapon-number" id="${baseId}-number" data-indicativo="${indicativoId}" data-weapon="${weapon.id}" onchange="updateStatus('${indicativoId}'); saveState();">
+                                        ${createOptions(weapon.numbers)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <div class="label">Cargadores</div>
+                                    <div class="magazines">
+                                        <label class="magazine-option">
+                                            <input type="radio" name="${baseId}-magazines" value="1" onclick="toggleMagazine(this, '${indicativoId}');">
+                                            <span>1</span>
+                                        </label>
+                                        <label class="magazine-option">
+                                            <input type="radio" name="${baseId}-magazines" value="2" onclick="toggleMagazine(this, '${indicativoId}');">
+                                            <span>2</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <textarea class="textarea-field" id="${baseId}-incident" placeholder="Incidencias" rows="1" oninput="updateStatus('${indicativoId}'); saveState();"></textarea>
+                        </div>
+                    `;
+                }).join("");
+
+                return `
+                    <details class="indicativo-card" id="details-${indicativoId}">
+                        <summary>
+                            <div class="indicativo-summary">
+                                <div class="indicativo-main">
+                                    <div class="indicativo-name">
+                                        <span class="completion-check" id="check-${indicativoId}">✓</span>
+                                        <span>${indicativo}</span>
+                                    </div>
+                                    <div class="indicativo-status" id="status-${indicativoId}">Sin armas asignadas</div>
+                                </div>
+                                <div class="chevron" aria-hidden="true"></div>
+                            </div>
+                        </summary>
+                        <div class="indicativo-body">
+                            <div class="equipment-checks">
+                                ${equipmentHtml}
+                            </div>
+                            ${weaponsHtml}
+                            <label class="return-option">
+                                <input type="checkbox" id="${indicativoId}-return-ok" onchange="updateStatus('${indicativoId}'); saveState();">
+                                <span>Devolucion material, sin novedad</span>
+                            </label>
+                        </div>
+                    </details>
+                `;
+            }).join("");
+        }
+
+        function getInputValue(id) {
+            const element = document.getElementById(id);
+            return element ? element.value.trim() : "";
+        }
+
+        function getRadioValue(name) {
+            const selected = document.querySelector(`input[name="${name}"]:checked`);
+            return selected ? selected.value : "";
+        }
+
+        function getEquipmentData(indicativoId) {
+            return equipmentTypes
+                .filter((equipment) => {
+                    const element = document.getElementById(`${indicativoId}-${equipment.id}`);
+                    return element && element.checked;
+                })
+                .map((equipment) => equipment.name);
+        }
+
+        function getReturnOk(indicativoId) {
+            const element = document.getElementById(`${indicativoId}-return-ok`);
+            return Boolean(element && element.checked);
+        }
+
+        function hasIndicativoData(indicativoId) {
+            const hasWeaponData = weaponTypes.some((weapon) => {
+                const data = getWeaponData(indicativoId, weapon);
+                return Boolean(data.number || data.magazines || data.incident);
+            });
+            return hasWeaponData || getEquipmentData(indicativoId).length > 0 || getReturnOk(indicativoId);
+        }
+
+        function toggleMagazine(input, indicativoId) {
+            const wasChecked = input.dataset.checked === "true";
+            document.querySelectorAll(`input[name="${input.name}"]`).forEach((radio) => {
+                radio.checked = false;
+                radio.dataset.checked = "false";
+            });
+
+            if (!wasChecked) {
+                input.checked = true;
+                input.dataset.checked = "true";
+            }
+
+            updateStatus(indicativoId);
+            saveState();
+        }
+
+        function getWeaponData(indicativoId, weapon) {
+            const baseId = `${indicativoId}-${weapon.id}`;
+            return {
+                name: weapon.name,
+                number: getInputValue(`${baseId}-number`),
+                magazines: getRadioValue(`${baseId}-magazines`),
+                incident: getInputValue(`${baseId}-incident`)
+            };
+        }
+
+        function updateStatus(indicativoId) {
+            const assigned = weaponTypes
+                .map((weapon) => getWeaponData(indicativoId, weapon))
+                .filter((weapon) => weapon.number);
+            const incidents = weaponTypes
+                .map((weapon) => getWeaponData(indicativoId, weapon))
+                .filter((weapon) => weapon.incident);
+            const status = document.getElementById(`status-${indicativoId}`);
+            const detail = document.getElementById(`details-${indicativoId}`);
+            const hasData = hasIndicativoData(indicativoId);
+
+            if (!hasData) {
+                status.textContent = "Sin armas asignadas";
+                if (detail) detail.classList.remove("is-filled");
+                return;
+            }
+
+            const assignedText = assigned.length ? `${assigned.length}/3 armas` : "Cumplimentado";
+            const incidentText = incidents.length ? ` - ${incidents.length} incidencia(s)` : "";
+            status.textContent = assignedText + incidentText;
+            if (detail) detail.classList.add("is-filled");
+        }
+
+        function formatDate(value) {
+            if (!value) return "";
+            const [year, month, day] = value.split("-");
+            return `${day}/${month}/${year}`;
+        }
+
+        function generateReport() {
+            const now = new Date();
+            const generatedDate = now.toLocaleDateString("es-ES");
+            const generatedTime = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+            let report = "ARMERO UPR - ARMAS COLECTIVAS\n";
+
+            const fecha = formatDate(getInputValue("fecha"));
+            const horaInicio = getInputValue("horaInicio");
+
+            if (fecha) report += `Fecha: ${fecha}\n`;
+            if (horaInicio) report += `Inicio servicio: ${horaInicio}\n`;
+            report += "------------------------\n";
+
+            let hasAssignments = false;
+            indicativos.forEach((indicativo) => {
+                const indicativoId = normalizeId(indicativo);
+                const equipment = getEquipmentData(indicativoId);
+                const returnOk = getReturnOk(indicativoId);
+                const lines = weaponTypes.map((weapon) => {
+                    const data = getWeaponData(indicativoId, weapon);
+                    if (!data.number && !data.magazines && !data.incident) return "";
+
+                    let line = `${data.name}: ${data.number || "SIN ASIGNAR"}`;
+                    if (data.magazines) line += ` | ${data.magazines} cargador(es)`;
+                    if (data.incident) line += ` | Incidencia: ${data.incident}`;
+                    return line;
+                }).filter(Boolean);
+
+                if (equipment.length) {
+                    lines.unshift(`Material: ${equipment.join(", ")}`);
+                }
+
+                if (returnOk) {
+                    lines.push("Devolucion material, sin novedad");
+                }
+
+                if (lines.length) {
+                    hasAssignments = true;
+                    report += `${indicativo}\n${lines.join("\n")}\n------------------------\n`;
+                }
+            });
+
+            if (!hasAssignments) {
+                report += "Sin armas asignadas.\n------------------------\n";
+            }
+
+            report += `Generado: ${generatedDate} ${generatedTime}`;
+            return report;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 2000);
+        }
+
+        async function copyReport() {
+            const report = generateReport();
+            try {
+                await navigator.clipboard.writeText(report);
+                showToast("Copiado al portapapeles");
+            } catch (err) {
+                const textArea = document.createElement("textarea");
+                textArea.value = report;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand("copy");
+                    showToast("Copiado al portapapeles");
+                } catch (copyError) {
+                    showToast("Error al copiar");
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function shareWhatsApp() {
+            const report = generateReport();
+            const url = `https://wa.me/?text=${encodeURIComponent(report)}`;
+            window.open(url, "_blank");
+        }
+
+        function resetForm() {
+            if (!confirm("Seguro que quieres borrar todos los datos?")) return;
+
+            document.querySelectorAll(".input-text, .select-field, .textarea-field").forEach((element) => {
+                element.value = "";
+            });
+            document.querySelectorAll("input[type='radio']").forEach((element) => {
+                element.checked = false;
+                element.dataset.checked = "false";
+            });
+            document.querySelectorAll("input[type='checkbox']").forEach((element) => {
+                element.checked = false;
+            });
+            indicativos.forEach((indicativo) => updateStatus(normalizeId(indicativo)));
+            localStorage.removeItem("armero-upr-state");
+            setDefaultDateTime();
+            showToast("Formulario limpiado");
+        }
+
+        function saveState() {
+            const data = {};
+            document.querySelectorAll(".input-text, .select-field, .textarea-field").forEach((element) => {
+                data[element.id] = element.value;
+            });
+            document.querySelectorAll("input[type='radio']").forEach((element) => {
+                if (element.checked) data[element.name] = element.value;
+            });
+            document.querySelectorAll("input[type='checkbox']").forEach((element) => {
+                data[element.id] = element.checked;
+            });
+            localStorage.setItem("armero-upr-state", JSON.stringify(data));
+        }
+
+        function loadState() {
+            const raw = localStorage.getItem("armero-upr-state");
+            if (!raw) return false;
+
+            const data = JSON.parse(raw);
+            Object.entries(data).forEach(([key, value]) => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === "checkbox") {
+                        element.checked = Boolean(value);
+                    } else {
+                        element.value = value;
+                    }
+                    return;
+                }
+
+                const radio = document.querySelector(`input[name="${key}"][value="${value}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    radio.dataset.checked = "true";
+                }
+            });
+            indicativos.forEach((indicativo) => updateStatus(normalizeId(indicativo)));
+            return true;
+        }
+
+        function setDefaultDateTime() {
+            const now = new Date();
+            const dateInput = document.getElementById("fecha");
+            const timeInput = document.getElementById("horaInicio");
+            dateInput.value = now.toISOString().slice(0, 10);
+            timeInput.value = now.toTimeString().slice(0, 5);
+        }
+
+        document.addEventListener("input", saveState);
+        document.addEventListener("change", saveState);
+
+        renderIndicativos();
+        if (!loadState()) {
+            setDefaultDateTime();
+        }
+    </script>
+</body>
+</html>
