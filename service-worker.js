@@ -1,4 +1,4 @@
-const CACHE_NAME = "arm-pwa-v11";
+const CACHE_NAME = "arm-pwa-v12";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
   "./service-worker.js",
   "./icon-192.png",
   "./icon-512.png",
+  "./assets/app-icon.svg",
   "./assets/brand.svg"
 ];
 
