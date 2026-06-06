@@ -171,6 +171,12 @@
             color: #737b91;
         }
 
+        .weapon-number-fields {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 7px;
+        }
+
         details.indicativo-card {
             padding: 0;
             overflow: hidden;
@@ -536,9 +542,9 @@
             <div id="indicativosContainer"></div>
 
             <div class="action-buttons">
-                <button class="btn btn-copy" onclick="copyReport()">COPIAR</button>
+                <button class="btn btn-copy" onclick="copyReportV15()">COPIAR</button>
                 <div class="secondary-actions">
-                    <button class="btn btn-whatsapp" onclick="shareWhatsApp()">WHATSAPP</button>
+                    <button class="btn btn-whatsapp" onclick="shareWhatsAppV15()">WHATSAPP</button>
                     <button class="btn btn-reset" onclick="resetForm()">LIMPIAR</button>
                 </div>
             </div>
@@ -548,6 +554,8 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        const APP_VERSION = "v16-formato-lista-whatsapp";
+        const REPORT_BREAK = "\r\n";
         const indicativos = ["SIGMA 1", "SIGMA 10", "SIGMA 11", "SIGMA 12", "SIGMA 13", "SIGMA 14", "SIGMA 15", "SIGMA 16"];
 
         const weaponTypes = [
@@ -568,7 +576,7 @@
 
         function createOptions(numbers) {
             return ["", ...numbers].map((number) => {
-                const label = number || "Sin asignar";
+                const label = number || "Preestablecida";
                 return `<option value="${number}">${label}</option>`;
             }).join("");
         }
@@ -594,9 +602,12 @@
                             <div class="weapon-grid">
                                 <div class="indicativo-main">
                                     <div class="label">Numero</div>
-                                    <select class="select-field weapon-number" id="${baseId}-number" data-indicativo="${indicativoId}" data-weapon="${weapon.id}" onchange="updateStatus('${indicativoId}'); saveState();">
-                                        ${createOptions(weapon.numbers)}
-                                    </select>
+                                    <div class="weapon-number-fields">
+                                        <select class="select-field weapon-number" id="${baseId}-number-preset" data-indicativo="${indicativoId}" data-weapon="${weapon.id}" onchange="updateStatus('${indicativoId}'); saveState();">
+                                            ${createOptions(weapon.numbers)}
+                                        </select>
+                                        <input type="text" inputmode="numeric" class="input-text weapon-number" id="${baseId}-number-manual" data-indicativo="${indicativoId}" data-weapon="${weapon.id}" placeholder="Manual si no esta en lista" oninput="updateStatus('${indicativoId}'); saveState();">
+                                    </div>
                                 </div>
                                 <div>
                                     <div class="label">Cargadores</div>
@@ -696,9 +707,11 @@
 
         function getWeaponData(indicativoId, weapon) {
             const baseId = `${indicativoId}-${weapon.id}`;
+            const manualNumber = getInputValue(`${baseId}-number-manual`);
+            const presetNumber = getInputValue(`${baseId}-number-preset`);
             return {
                 name: weapon.name,
-                number: getInputValue(`${baseId}-number`),
+                number: manualNumber || presetNumber,
                 magazines: getRadioValue(`${baseId}-magazines`),
                 incident: getInputValue(`${baseId}-incident`)
             };
@@ -733,54 +746,43 @@
             return `${day}/${month}/${year}`;
         }
 
-        function generateReport() {
-            const now = new Date();
-            const generatedDate = now.toLocaleDateString("es-ES");
-            const generatedTime = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-            let report = "ARMERO UPR - ARMAS COLECTIVAS\n";
-
-            const fecha = formatDate(getInputValue("fecha"));
-            const horaInicio = getInputValue("horaInicio");
-
-            if (fecha) report += `Fecha: ${fecha}\n`;
-            if (horaInicio) report += `Inicio servicio: ${horaInicio}\n`;
-            report += "------------------------\n";
-
+        function generateReportV15() {
+            const reportLines = [];
             let hasAssignments = false;
             indicativos.forEach((indicativo) => {
                 const indicativoId = normalizeId(indicativo);
                 const equipment = getEquipmentData(indicativoId);
                 const returnOk = getReturnOk(indicativoId);
-                const lines = weaponTypes.map((weapon) => {
+                const weaponLines = weaponTypes.map((weapon) => {
                     const data = getWeaponData(indicativoId, weapon);
                     if (!data.number && !data.magazines && !data.incident) return "";
 
-                    let line = `${data.name}: ${data.number || "SIN ASIGNAR"}`;
-                    if (data.magazines) line += ` | ${data.magazines} cargador(es)`;
-                    if (data.incident) line += ` | Incidencia: ${data.incident}`;
+                    let line = data.number ? `${data.name} ${data.number}` : `${data.name} sin numero`;
+                    if (data.magazines) line += ` (${data.magazines} carg.)`;
+                    if (data.incident) line += ` - Incidencia: ${data.incident}`;
                     return line;
                 }).filter(Boolean);
+                const lines = weaponLines.map((line) => `- ${line}`);
 
                 if (equipment.length) {
-                    lines.unshift(`Material: ${equipment.join(", ")}`);
+                    lines.push(`Material: ${equipment.join(", ")}`);
                 }
 
                 if (returnOk) {
-                    lines.push("Devolucion material, sin novedad");
+                    lines.push("Devolucion OK");
                 }
 
                 if (lines.length) {
                     hasAssignments = true;
-                    report += `${indicativo}\n${lines.join("\n")}\n------------------------\n`;
+                    reportLines.push(`${indicativo}:${REPORT_BREAK}${lines.join(REPORT_BREAK)}`);
                 }
             });
 
             if (!hasAssignments) {
-                report += "Sin armas asignadas.\n------------------------\n";
+                return "Sin armas asignadas.";
             }
 
-            report += `Generado: ${generatedDate} ${generatedTime}`;
-            return report;
+            return reportLines.join(REPORT_BREAK);
         }
 
         function showToast(message) {
@@ -792,8 +794,8 @@
             }, 2000);
         }
 
-        async function copyReport() {
-            const report = generateReport();
+        async function copyReportV15() {
+            const report = generateReportV15();
             try {
                 await navigator.clipboard.writeText(report);
                 showToast("Copiado al portapapeles");
@@ -814,11 +816,15 @@
             }
         }
 
-        function shareWhatsApp() {
-            const report = generateReport();
+        function shareWhatsAppV15() {
+            const report = generateReportV15();
             const url = `https://wa.me/?text=${encodeURIComponent(report)}`;
             window.open(url, "_blank");
         }
+
+        const generateReport = generateReportV15;
+        const copyReport = copyReportV15;
+        const shareWhatsApp = shareWhatsAppV15;
 
         function resetForm() {
             if (!confirm("Seguro que quieres borrar todos los datos?")) return;
@@ -867,6 +873,20 @@
                         element.value = value;
                     }
                     return;
+                }
+
+                if (key.endsWith("-number")) {
+                    const preset = document.getElementById(`${key}-preset`);
+                    const manual = document.getElementById(`${key}-manual`);
+                    if (preset && manual) {
+                        const hasPresetValue = Array.from(preset.options).some((option) => option.value === value);
+                        if (hasPresetValue) {
+                            preset.value = value;
+                        } else {
+                            manual.value = value;
+                        }
+                        return;
+                    }
                 }
 
                 const radio = document.querySelector(`input[name="${key}"][value="${value}"]`);
